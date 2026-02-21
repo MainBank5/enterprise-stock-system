@@ -10,7 +10,7 @@ async function bootstrap() {
     options: { urls: [process.env.RABBITMQ_URL], queue: 'availability_queue', queueOptions: { durable: true }, noAck: false },
   });
   await app.startAllMicroservices();
-  await app.listen(process.env.PORT ?? 3003);
-  new Logger('Availability Service').log('📦 Availability Service ready');
+  await app.listen(process.env.PORT ?? 4003);
+  new Logger('Availability Service').log(' Availability Service ready');
 }
 bootstrap();

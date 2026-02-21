@@ -10,7 +10,7 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api/v1');
 
-  const port = process.env.PORT ?? 3005;
+  const port = process.env.PORT ?? 4005;
   await app.listen(port);
   logger.log(`🔐 Auth Service running on port ${port}`);
 }

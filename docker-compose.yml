@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # ─── Infrastructure ────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: enterprise_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U admin -d enterprise_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Services ──────────────────────────────────────────────────
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - '3005:3005'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/enterprise_db
+      - JWT_SECRET=super_secret_jwt_key_change_in_prod
+      - JWT_EXPIRES_IN=7d
+      - PORT=3005
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - '3000:3000'
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - JWT_SECRET=super_secret_jwt_key_change_in_prod
+      - PORT=3000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  orders-service:
+    build: ./orders-service
+    container_name: orders-service
+    ports:
+      - '3001:3001'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/enterprise_db
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - PORT=3001
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports:
+      - '3002:3002'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/enterprise_db
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - PORT=3002
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  availability-service:
+    build: ./availability-service
+    container_name: availability-service
+    ports:
+      - '3003:3003'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/enterprise_db
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - PORT=3003
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  email-service:
+    build: ./email-service
+    container_name: email-service
+    ports:
+      - '3004:3004'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/enterprise_db
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - SMTP_HOST=smtp.mailtrap.io
+      - SMTP_PORT=587
+      - SMTP_USER=your_user
+      - SMTP_PASS=your_pass
+      - PORT=3004
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

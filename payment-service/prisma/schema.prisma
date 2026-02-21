@@ -1,0 +1,31 @@
+generator client {
+  binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x"]
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  orderId        String        @map("order_id")
+  userId         String        @map("user_id")
+  amount         Float
+  status         PaymentStatus @default(PENDING)
+  idempotencyKey String        @unique @map("idempotency_key")  // ← prevents double charge
+  provider       String?
+  transactionId  String?       @map("transaction_id")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}

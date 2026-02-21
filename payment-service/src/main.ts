@@ -15,7 +15,7 @@ async function bootstrap() {
     },
   });
   await app.startAllMicroservices();
-  await app.listen(process.env.PORT ?? 3002);
-  new Logger('Payment Service').log('💳 Payment Service ready');
+  await app.listen(process.env.PORT ?? 4002);
+  new Logger('Payment Service').log(' Payment Service ready');
 }
 bootstrap();

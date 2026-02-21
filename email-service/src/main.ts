@@ -10,7 +10,7 @@ async function bootstrap() {
     options: { urls: [process.env.RABBITMQ_URL], queue: 'email_notifications_queue', queueOptions: { durable: true }, noAck: false },
   });
   await app.startAllMicroservices();
-  await app.listen(process.env.PORT ?? 3004);
-  new Logger('Email Service').log('📧 Email Service ready');
+  await app.listen(process.env.PORT ?? 4004);
+  new Logger('Email Service').log('Email Service ready');
 }
 bootstrap();

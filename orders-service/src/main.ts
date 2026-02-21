@@ -15,7 +15,7 @@ async function bootstrap() {
     },
   });
   await app.startAllMicroservices();
-  await app.listen(process.env.PORT ?? 3001);
-  new Logger('Orders Service').log('🟢 Orders Service ready');
+  await app.listen(process.env.PORT ?? 4001);
+  new Logger('Orders Service').log('Orders Service ready');
 }
 bootstrap();

@@ -8,7 +8,7 @@ COPY ./auth-service/package*.json ./
 RUN npm install
 
 # Copy service code and shared logic
-COPY ./orders-service .
+COPY ./auth-service .
 COPY ./shared ../shared
 
 # Compile NestJS

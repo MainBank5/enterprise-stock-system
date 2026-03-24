@@ -1,8 +1,31 @@
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
+# 1. Base image
+FROM node:20-alpine AS development
+
+# 2. Set the working directory INSIDE the container
+WORKDIR /usr/src/app
+
+# 3. Copy package files from the ROOT context
+COPY ./api-gateway/package*.json ./
+
+# 4. Install dependencies
 RUN npm install
-COPY . .
+
+# 5. Copy the service code
+COPY ./api-gateway .
+
+# 6. Copy the SHARED folder (Crucial for your events)
+# This copies the local 'shared' folder to a 'shared' folder inside the container
+COPY ./shared ../shared
+
+# 7. Build the NestJS app
 RUN npm run build
-EXPOSE 3000
+
+# 8. Production Stage
+FROM node:20-alpine AS production
+WORKDIR /usr/src/app
+COPY --from=development /usr/src/app/dist ./dist
+COPY --from=development /usr/src/app/node_modules ./node_modules
+# We also need the shared folder in the final image if it's a dependency
+COPY --from=development /usr/src/shared ../shared 
+
 CMD ["node", "dist/main"]

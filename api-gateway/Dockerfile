@@ -28,4 +28,10 @@ COPY --from=development /usr/src/app/node_modules ./node_modules
 # We also need the shared folder in the final image if it's a dependency
 COPY --from=development /usr/src/shared ../shared 
 
+# Set the environment to production
+ENV NODE_ENV=production
+
+# DOCUMENTATION: Tells EKS/Docker which port the app uses
+EXPOSE 3000
+
 CMD ["node", "dist/main"]

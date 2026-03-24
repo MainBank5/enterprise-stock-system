@@ -26,6 +26,7 @@ COPY --from=development /usr/src/shared ../shared
 
 # Standard production settings
 ENV NODE_ENV=production
+#expose port
 EXPOSE 3003
 
 CMD ["node", "dist/main"]

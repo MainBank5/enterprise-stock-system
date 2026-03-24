@@ -13,7 +13,7 @@ RUN npm install
 # 5. Copy the service code
 COPY ./api-gateway .
 
-# 6. Copy the SHARED folder (Crucial for your events)
+# 6. Copy the SHARED folder (Crucial for events)
 # This copies the local 'shared' folder to a 'shared' folder inside the container
 COPY ./shared ../shared
 
@@ -30,8 +30,6 @@ COPY --from=development /usr/src/shared ../shared
 
 # Set the environment to production
 ENV NODE_ENV=production
-
-# DOCUMENTATION: Tells EKS/Docker which port the app uses
 EXPOSE 3000
 
 CMD ["node", "dist/main"]

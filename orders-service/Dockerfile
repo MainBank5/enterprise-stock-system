@@ -4,7 +4,7 @@ FROM node:20-alpine AS development
 WORKDIR /usr/src/app
 
 # Copy from the ROOT of your repo
-COPY ./auth-service/package*.json ./
+COPY ./order-service/package*.json ./
 RUN npm install
 
 # Copy service code and shared logic

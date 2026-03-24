@@ -78,5 +78,10 @@ jobs:
           # Build from root context (.) so Docker can see the /shared folder
           docker build -t $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG \
             -f ./${{ matrix.service }}/Dockerfile .
+
+
+
+
+            
             
           docker push $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG

@@ -8,7 +8,7 @@ COPY ./payment-service/package*.json ./
 RUN npm install
 
 # Copy service code and shared logic
-COPY ./availability-service .
+COPY ./payment-service .
 COPY ./shared ../shared
 
 # Compile NestJS

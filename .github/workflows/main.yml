@@ -11,6 +11,7 @@ on:
       - 'payment-service/**'
       - 'email-service/**'
       - 'shared/**'
+  workflow_dispatch: # Allows you to manually trigger a build for all services
 
 jobs:
   # 1. Detect which folders changed
@@ -43,15 +44,16 @@ jobs:
               - 'email-service/**'
               - 'shared/**'
 
-  # 2. Build ONLY the changed services
+  # 2. Build Services
   build:
     needs: changes
-    if: ${{ needs.changes.outputs.packages != '[]' }}
+    # Run if there are changes OR if we clicked the manual "Run workflow" button
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.packages != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # This converts the list of changed services into a matrix
-        service: ${{ fromJSON(needs.changes.outputs.packages) }}
+        # If manual: build all 6. If push: build only the detected changes.
+        service: ${{ github.event_name == 'workflow_dispatch' && fromJSON('["api-gateway", "auth-service", "availability-service", "orders-service", "payment-service", "email-service"]') || fromJSON(needs.changes.outputs.packages) }}
     
     steps:
       - name: Checkout Code
@@ -74,11 +76,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build from root context (.) so Docker can see the /shared folder
-          # Point to the specific Dockerfile inside the service directory
           docker build -t $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG \
             -f ./${{ matrix.service }}/Dockerfile .
             
           docker push $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG
-
-
-          

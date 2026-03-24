@@ -1,11 +1,31 @@
-FROM node:20-alpine
-# ── Install OpenSSL (required by Prisma on Alpine/musl) ──────
-RUN apk add --no-cache openssl
-WORKDIR /app
-COPY package*.json ./
+# STAGE 1: Development (The "Heavy" part where we build the code)
+FROM node:20-alpine AS development
+
+WORKDIR /usr/src/app
+
+# Copy from the ROOT of your repo
+COPY ./auth-service/package*.json ./
 RUN npm install
-COPY . .
-RUN npx prisma generate
+
+# Copy service code and shared logic
+COPY ./orders-service .
+COPY ./shared ../shared
+
+# Compile NestJS
 RUN npm run build
-EXPOSE 3005
+
+# STAGE 2: Production (The "Light" part that actually runs on EKS)
+FROM node:20-alpine AS production
+
+WORKDIR /usr/src/app
+
+# Copy ONLY the compiled code and modules from the development stage
+COPY --from=development /usr/src/app/dist ./dist
+COPY --from=development /usr/src/app/node_modules ./node_modules
+COPY --from=development /usr/src/shared ../shared 
+
+# Standard production settings
+ENV NODE_ENV=production
+EXPOSE 3000
+
 CMD ["node", "dist/main"]

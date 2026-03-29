@@ -13,7 +13,6 @@ on:
       - 'shared/**'
 
 jobs:
-  # 1. Detect which folders changed
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -43,10 +42,8 @@ jobs:
               - 'email-service/**'
               - 'shared/**'
 
-  # 2. Build ONLY the changed services
   build:
     needs: changes
-    # Only run if the filter actually found changes
     if: ${{ needs.changes.outputs.packages != '[]' }}
     runs-on: ubuntu-latest
     strategy:
@@ -60,8 +57,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::996549485813:role/github-actions-ecr-role
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
